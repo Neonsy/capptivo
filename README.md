@@ -124,14 +124,16 @@ Platform notes:
 ## Quick start
 
 ```bash
-pnpm install
-pnpm tauri dev
+corepack pnpm install
+corepack pnpm tauri dev
 ```
 
-Requires **Rust**, **Node**, and **pnpm**. FFmpeg is fetched automatically as a
-per-platform sidecar on first dev/build (`scripts/fetch-ffmpeg.mjs`), installed
-as `capptivo-ffmpeg` / `capptivo-ffprobe` so Linux packages do not collide with
-the system `ffmpeg` package.
+Requires **Rust**, the **Node** version declared in `.node-version`, and
+**Corepack**. Corepack selects the pinned pnpm release from `package.json`.
+FFmpeg is fetched automatically as a per-platform sidecar on first dev/build
+(`scripts/fetch-ffmpeg.mjs`), installed as `capptivo-ffmpeg` /
+`capptivo-ffprobe` so Linux packages do not collide with the system `ffmpeg`
+package.
 
 macOS: grant Screen Recording in System Settings on first launch, then relaunch.  
 Open the recorder with **⌥⇧R** (**Alt+Shift+R** on Windows/Linux), or click the tray icon.
@@ -286,7 +288,7 @@ src-tauri/src/
 ## Development
 
 ```bash
-pnpm tauri dev                 # app + Vite
+corepack pnpm tauri dev        # app + Vite
 cd src-tauri && cargo test --no-default-features
 cargo check --no-default-features
 ```
