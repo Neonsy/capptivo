@@ -57,9 +57,10 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
 
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust 1.98.0
+        uses: dtolnay/rust-toolchain@1.98.0
         with:
+          components: clippy, rustfmt
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - uses: swatinem/rust-cache@v2
