@@ -1176,23 +1176,24 @@ mod tests {
 
     #[test]
     fn wait_child_times_out_and_kills_the_child() {
-        // Long-lived sleeper: proves the finalize timeout is reachable and that
-        // the kill path runs (the ordering bug in `finish()` made this dead).
-        let mut child = if cfg!(windows) {
-            std::process::Command::new("cmd")
-                .args(["/C", "timeout", "/T", "60", "/NOBREAK"])
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn()
-                .expect("spawn sleeper")
-        } else {
-            std::process::Command::new("sleep")
-                .arg("60")
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn()
-                .expect("spawn sleeper")
-        };
+        const CHILD_FLAG: &str = "CAPPTIVO_WAIT_CHILD_TEST_PROCESS";
+        if std::env::var_os(CHILD_FLAG).is_some() {
+            std::thread::sleep(Duration::from_secs(60));
+            return;
+        }
+
+        // A direct child avoids shell helpers that require an interactive console
+        let mut child = crate::proc::command(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "recorder::encoder::tests::wait_child_times_out_and_kills_the_child",
+            ])
+            .env(CHILD_FLAG, "1")
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .expect("spawn sleeper");
 
         let started = Instant::now();
         let err = wait_child(&mut child, Duration::from_millis(200)).expect_err("must time out");
