@@ -124,14 +124,37 @@ Platform notes:
 ## Quick start
 
 ```bash
-pnpm install
-pnpm tauri dev
+corepack pnpm install
+corepack pnpm tauri dev
 ```
 
-Requires **Rust**, **Node**, and **pnpm**. FFmpeg is fetched automatically as a
-per-platform sidecar on first dev/build (`scripts/fetch-ffmpeg.mjs`), installed
-as `capptivo-ffmpeg` / `capptivo-ffprobe` so Linux packages do not collide with
-the system `ffmpeg` package.
+Requires **Rust 1.98.0**, the **Node** version declared in `.node-version`, and
+**Corepack**. The Rust toolchain file includes rustfmt and Clippy, while Corepack
+selects the pinned pnpm release from `package.json`.
+FFmpeg is fetched automatically as a per-platform sidecar on first dev/build
+(`scripts/fetch-ffmpeg.mjs`), installed as `capptivo-ffmpeg` /
+`capptivo-ffprobe` so Linux packages do not collide with the system `ffmpeg`
+package. Exact source URLs, archive members, sizes, and SHA-256 digests are
+committed in `scripts/ffmpeg-sidecars.json`. The fetcher verifies downloaded,
+extracted, staged, and cached files before it permits Tauri's chained command
+to continue; a missing or invalid cache entry is replaced from the pinned
+source.
+
+On Windows, a portable Rust 1.98.0 toolchain can be placed under `.local`. Run
+development commands through the repository launcher so Rust is selected only
+from that directory:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/with-local-rust.ps1 corepack pnpm tauri dev
+```
+
+The launcher prefers a verified versioned MSVC toolchain, such as
+`.local/rustup/toolchains/1.98.0-x86_64-pc-windows-msvc/bin`, and uses a sole
+matching alias only when that directory is absent. It keeps Cargo state and
+build output under `.local`, does not install or download Rust, and does not
+fall back to a host toolchain. Native Windows builds still require the MSVC C++
+Build Tools, including `link.exe`, on `PATH`; the
+portable directory replaces only the Rust installation.
 
 macOS: grant Screen Recording in System Settings on first launch, then relaunch.  
 Open the recorder with **⌥⇧R** (**Alt+Shift+R** on Windows/Linux), or click the tray icon.
@@ -286,9 +309,16 @@ src-tauri/src/
 ## Development
 
 ```bash
-pnpm tauri dev                 # app + Vite
+corepack pnpm tauri dev        # app + Vite
 cd src-tauri && cargo test --no-default-features
 cargo check --no-default-features
+```
+
+Windows development with portable Rust uses the repository root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/with-local-rust.ps1 cargo test --manifest-path src-tauri/Cargo.toml --no-default-features
+powershell -ExecutionPolicy Bypass -File scripts/with-local-rust.ps1 cargo check --manifest-path src-tauri/Cargo.toml --no-default-features
 ```
 
 ---
